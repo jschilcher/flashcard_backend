@@ -92,6 +92,27 @@ router.post("/:cardPackageId/cards/:cardId", async (req, res) => {
     }
 });
 
+router.put("/:cardPackageId/cards/:cardId", async (req, res) => {
+    try {
+        const {error} = validateCard(req.body);
+        if (error) return res.status(400).send(error);
+
+        const cardPackage = await CardPackage.findById(req.params.cardPackageId);
+        if(!cardPackage) return res.status(400).send(`The cardpackage with id "${req.params.cardPackageId}" does not exist.`);
+
+        const card = cardPackage.cards.id(req.params.cardId);
+        if (!card) return res.status(400).send(`The card with id "${req.params.cardId}" does not exist.`);
+
+        card.front = req.body.front;
+        card.back = req.body.back;
+
+        await cardPackage.save();
+        return res.send(card);
+    } catch (ex) {
+        return res.status(500).send(`Internal server error: ${ex}`);
+    }
+});
+
 
 router.delete("/:cardPackageId/cards/:cardId", async (req, res) => {
     try {
