@@ -75,15 +75,22 @@ router.get("/:cardPackageId/cards/:cardId", async (req, res) => {
     }
 });
 
-router.post("/:cardPackageId/cards/:cardId", async (req, res) => {
+router.post("/:cardPackageId/cards", async (req, res) => {
     try {
         const cardPackage = await CardPackage.findById(req.params.cardPackageId);
         if(!cardPackage) return res.status(400).send(`The product with id "${req.params.cardPackageId}" does not exist.`);
 
-        const card = await Card.findById(req.params.cardId);
-        if (!card) return res.status(400).send(`The card with id "${req.params.cardId}" does not exist.`);
+        // const card = await Card.findById(req.params.cardId);
+        // if (!card) return res.status(400).send(`The card with id "${req.params.cardId}" does not exist.`);
 
-        cardPackage.cards.push(card);
+        const card = new Card({
+            front: req.body.front,
+            back: req.body.back
+        })
+
+        await card.save();
+
+       cardPackage.cards.push(card);
 
         await cardPackage.save();
         return res.send(cardPackage.cards);
